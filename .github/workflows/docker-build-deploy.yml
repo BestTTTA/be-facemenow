@@ -1,4 +1,4 @@
-name: FastAPI CI/CD with Docker Compose
+name: CI/CD Be Facemenow
 
 on:
   push:
