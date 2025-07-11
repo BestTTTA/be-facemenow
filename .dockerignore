@@ -25,6 +25,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.env
+.env-on-github-actions-example
+minio-credentials.json
 
 # Virtual Environment
 venv/
@@ -45,3 +48,6 @@ results/
 # Docker
 Dockerfile
 .dockerignore 
+
+api-routes.png
+stripe_backup_code.txt

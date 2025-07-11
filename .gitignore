@@ -1,5 +1,12 @@
-.env.*
+.env
+.env-on-github-actions-example
 __pycache__
 venv
-
-test-for-ttta-cicd
+.venv
+api-routes.png
+mock-data-donate-version.sql
+mock-data-paid-version.sql
+manual_upload_images.py
+Example-usecase.txt
+minio-credentials.json
+stripe_backup_code.txt
