@@ -227,7 +227,7 @@ async def add_image_to_db_async(image_path: str, img_url: str, cuser_id: str, ev
         "faces": result
     }
 
-# -------------------- EVENT MANAGEMENT --------------------
+# -------------------- EVENT --------------------
 
 @app.post("/events")
 async def create_event(
