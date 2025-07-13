@@ -116,6 +116,19 @@ class FaceDatabase:
                     )
                 ''')
 
+                # ---------- DUSERS ----------
+                cursor.execute(''' 
+                    CREATE TABLE IF NOT EXISTS dusers (
+                        id TEXT PRIMARY KEY,
+                        display_name VARCHAR(50),
+                        display_details VARCHAR(50),
+                        profile_url TEXT,
+                        consent BOOLEAN,
+                        create_at TIMESTAMP,
+                        update_at TIMESTAMP
+                    )
+                ''')
+
                 # ---------- IMAGES ----------
                 cursor.execute(''' 
                     CREATE TABLE IF NOT EXISTS images (
@@ -160,19 +173,6 @@ class FaceDatabase:
                     )
                 ''')
 
-                # ---------- DUSERS ----------
-                cursor.execute(''' 
-                    CREATE TABLE IF NOT EXISTS dusers (
-                        id TEXT PRIMARY KEY,
-                        display_name VARCHAR(50),
-                        display_details VARCHAR(50),
-                        profile_url TEXT,
-                        consent BOOLEAN,
-                        create_at TIMESTAMP,
-                        update_at TIMESTAMP
-                    )
-                ''')
-
                 # ---------- IMAGES CART ----------
                 cursor.execute(''' 
                     CREATE TABLE IF NOT EXISTS images_cart (
@@ -200,8 +200,8 @@ class FaceDatabase:
                         FOREIGN KEY (duser_id) REFERENCES dusers(id)
                     )
                 ''')
-                
-                # ---------- LEADERBOARD (ALTER ADD) ----------
+
+                # ---------- ALTER LEADERBOARD ----------
                 cursor.execute('''
                     ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT
                 ''')
@@ -265,15 +265,15 @@ class FaceDatabase:
                     CREATE INDEX IF NOT EXISTS idx_payment_logs_processed_at ON payment_logs(processed_at)
                 ''')
 
-                # ---------- UPDATE EXISTING LEADERBOARD DATA ----------
+                # ---------- UPDATE LEADERBOARD PAYMENT STATUS ----------
                 cursor.execute('''
                     UPDATE leaderboard
                     SET payment_status = 'direct'
                     WHERE payment_status IS NULL OR payment_status = 'pending'
                 ''')
 
-
             conn.commit()
+
 
     def add_image(self, img_id: str, img_url: str, cuser_id: str, event_id: str, file_hash: str, last_modified: float, metadata: Dict):
         """
