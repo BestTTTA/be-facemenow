@@ -6,11 +6,11 @@ services:
     container_name: facemenow-postgres
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres1234
-      POSTGRES_DB: facemenowtestdb
+      POSTGRES_USER: facemenowuser
+      POSTGRES_PASSWORD: facemenowpassword123456
+      POSTGRES_DB: facemenowdb
     ports:
-      - "5432:5432"
+      - "5555:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
 

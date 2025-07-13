@@ -240,16 +240,13 @@ async def create_event(
     event_id = str(uuid.uuid4())
     current_time = datetime.now()
 
-    # 1. Save file temporarily
     unique_name = f"{event_id}_{event_img.filename}"
     temp_path = UPLOAD_DIR / unique_name
     with temp_path.open("wb") as buffer:
         shutil.copyfileobj(event_img.file, buffer)
 
-    # 2. Upload to MinIO
     event_img_url = upload_to_minio(temp_path, unique_name)
-
-    # 3. Insert event with image url
+    
     query = """
         INSERT INTO events (id, event_name, event_details, event_img_url, start_at, end_at, create_at, update_at)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
