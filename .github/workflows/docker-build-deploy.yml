@@ -1,0 +1,66 @@
+name: CI/CD Be Facemenow
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  DOCKER_IMAGE: bestbest/be-facemenow:1.0.0
+  DEPLOY_SERVER: 119.59.99.92
+  DEPLOY_USER: root
+  DOCKER_USERNAME: bestbest
+
+jobs:
+  build_and_push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u $DOCKER_USERNAME --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t $DOCKER_IMAGE .
+
+      - name: Push Docker image to Docker Hub
+        run: docker push $DOCKER_IMAGE
+
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    needs: build_and_push
+
+    steps:
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy Server
+        env:
+          DEPLOY_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
+          MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+          MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+        run: |
+          export SSHPASS=$DEPLOY_PASSWORD
+          sshpass -e ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_SERVER "
+            docker pull \"$DOCKER_IMAGE\"
+
+            if [ \"\$(docker ps -q -f name=be-facemenow)\" ]; then docker stop be-facemenow; fi
+            if [ \"\$(docker ps -aq -f name=be-facemenow)\" ]; then docker rm be-facemenow; fi
+
+            docker run -d -p 7777:8000 \
+              --env DATABASE_URL=${DATABASE_URL} \
+              --env MINIO_ENDPOINT=${MINIO_ENDPOINT} \
+              --env MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY} \
+              --env MINIO_SECRET_KEY=${MINIO_SECRET_KEY} \
+              --env STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY} \
+              --env STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET} \
+              --name be-facemenow \"$DOCKER_IMAGE\"
+          "
