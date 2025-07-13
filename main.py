@@ -201,14 +201,14 @@ def upload_to_minio(file_path: Path, object_name: str) -> str:
         MINIO_ENDPOINT,
         access_key=MINIO_ACCESS_KEY,
         secret_key=MINIO_SECRET_KEY,
-        secure=False
+        secure=True
     )
     bucket = "images"
     if not client.bucket_exists(bucket):
         client.make_bucket(bucket)
 
     client.fput_object(bucket, object_name, str(file_path))
-    return f"http://{MINIO_ENDPOINT}/{bucket}/{object_name}"
+    return f"https://{MINIO_ENDPOINT}/{bucket}/{object_name}"
 
 async def add_image_to_db_async(image_path: str, img_url: str, cuser_id: str, event_id: str) -> Dict:
     loop = asyncio.get_event_loop()
