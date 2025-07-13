@@ -186,91 +186,91 @@ class FaceDatabase:
                     )
                 ''')
 
-                # ---------- LEADERBOARD ----------
-                cursor.execute(''' 
-                    CREATE TABLE IF NOT EXISTS leaderboard (
-                        id TEXT PRIMARY KEY,
-                        event_id TEXT,
-                        duser_id TEXT,
-                        donate_price DOUBLE PRECISION,
-                        user_details VARCHAR(50),
-                        create_at TIMESTAMP,
-                        update_at TIMESTAMP,
-                        FOREIGN KEY (event_id) REFERENCES events(id),
-                        FOREIGN KEY (duser_id) REFERENCES dusers(id)
-                    )
-                ''')
+                # # ---------- LEADERBOARD ----------
+                # cursor.execute(''' 
+                #     CREATE TABLE IF NOT EXISTS leaderboard (
+                #         id TEXT PRIMARY KEY,
+                #         event_id TEXT,
+                #         duser_id TEXT,
+                #         donate_price DOUBLE PRECISION,
+                #         user_details VARCHAR(50),
+                #         create_at TIMESTAMP,
+                #         update_at TIMESTAMP,
+                #         FOREIGN KEY (event_id) REFERENCES events(id),
+                #         FOREIGN KEY (duser_id) REFERENCES dusers(id)
+                #     )
+                # ''')
 
-                # ---------- ALTER LEADERBOARD ----------
-                cursor.execute('''
-                    ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT
-                ''')
-                cursor.execute('''
-                    ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20) DEFAULT 'pending'
-                ''')
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_leaderboard_stripe_payment_intent ON leaderboard(stripe_payment_intent_id)
-                ''')
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_leaderboard_payment_status ON leaderboard(payment_status)
-                ''')
+                # # ---------- ALTER LEADERBOARD ----------
+                # cursor.execute('''
+                #     ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT
+                # ''')
+                # cursor.execute('''
+                #     ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20) DEFAULT 'pending'
+                # ''')
+                # cursor.execute('''
+                #     CREATE INDEX IF NOT EXISTS idx_leaderboard_stripe_payment_intent ON leaderboard(stripe_payment_intent_id)
+                # ''')
+                # cursor.execute('''
+                #     CREATE INDEX IF NOT EXISTS idx_leaderboard_payment_status ON leaderboard(payment_status)
+                # ''')
 
-                # ---------- PENDING PAYMENTS ----------
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS pending_payments (
-                        id TEXT PRIMARY KEY,
-                        stripe_payment_intent_id TEXT UNIQUE NOT NULL,
-                        event_id TEXT NOT NULL,
-                        duser_id TEXT NOT NULL,
-                        amount DOUBLE PRECISION NOT NULL,
-                        currency VARCHAR(3) DEFAULT 'thb',
-                        status VARCHAR(20) DEFAULT 'pending',
-                        create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (event_id) REFERENCES events(id),
-                        FOREIGN KEY (duser_id) REFERENCES dusers(id)
-                    )
-                ''')
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_pending_payments_stripe_intent ON pending_payments(stripe_payment_intent_id)
-                ''')
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_pending_payments_event ON pending_payments(event_id)
-                ''')
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_pending_payments_duser ON pending_payments(duser_id)
-                ''')
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_pending_payments_status ON pending_payments(status)
-                ''')
+                # # ---------- PENDING PAYMENTS ----------
+                # cursor.execute('''
+                #     CREATE TABLE IF NOT EXISTS pending_payments (
+                #         id TEXT PRIMARY KEY,
+                #         stripe_payment_intent_id TEXT UNIQUE NOT NULL,
+                #         event_id TEXT NOT NULL,
+                #         duser_id TEXT NOT NULL,
+                #         amount DOUBLE PRECISION NOT NULL,
+                #         currency VARCHAR(3) DEFAULT 'thb',
+                #         status VARCHAR(20) DEFAULT 'pending',
+                #         create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                #         update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                #         FOREIGN KEY (event_id) REFERENCES events(id),
+                #         FOREIGN KEY (duser_id) REFERENCES dusers(id)
+                #     )
+                # ''')
+                # cursor.execute('''
+                #     CREATE INDEX IF NOT EXISTS idx_pending_payments_stripe_intent ON pending_payments(stripe_payment_intent_id)
+                # ''')
+                # cursor.execute('''
+                #     CREATE INDEX IF NOT EXISTS idx_pending_payments_event ON pending_payments(event_id)
+                # ''')
+                # cursor.execute('''
+                #     CREATE INDEX IF NOT EXISTS idx_pending_payments_duser ON pending_payments(duser_id)
+                # ''')
+                # cursor.execute('''
+                #     CREATE INDEX IF NOT EXISTS idx_pending_payments_status ON pending_payments(status)
+                # ''')
 
-                # ---------- PAYMENT LOGS ----------
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS payment_logs (
-                        id TEXT PRIMARY KEY,
-                        stripe_payment_intent_id TEXT NOT NULL,
-                        event_type VARCHAR(100) NOT NULL,
-                        event_data JSONB,
-                        processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        status VARCHAR(20) DEFAULT 'processed'
-                    )
-                ''')
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_payment_logs_stripe_intent ON payment_logs(stripe_payment_intent_id)
-                ''')
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_payment_logs_event_type ON payment_logs(event_type)
-                ''')
-                cursor.execute('''
-                    CREATE INDEX IF NOT EXISTS idx_payment_logs_processed_at ON payment_logs(processed_at)
-                ''')
+                # # ---------- PAYMENT LOGS ----------
+                # cursor.execute('''
+                #     CREATE TABLE IF NOT EXISTS payment_logs (
+                #         id TEXT PRIMARY KEY,
+                #         stripe_payment_intent_id TEXT NOT NULL,
+                #         event_type VARCHAR(100) NOT NULL,
+                #         event_data JSONB,
+                #         processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                #         status VARCHAR(20) DEFAULT 'processed'
+                #     )
+                # ''')
+                # cursor.execute('''
+                #     CREATE INDEX IF NOT EXISTS idx_payment_logs_stripe_intent ON payment_logs(stripe_payment_intent_id)
+                # ''')
+                # cursor.execute('''
+                #     CREATE INDEX IF NOT EXISTS idx_payment_logs_event_type ON payment_logs(event_type)
+                # ''')
+                # cursor.execute('''
+                #     CREATE INDEX IF NOT EXISTS idx_payment_logs_processed_at ON payment_logs(processed_at)
+                # ''')
 
-                # ---------- UPDATE LEADERBOARD PAYMENT STATUS ----------
-                cursor.execute('''
-                    UPDATE leaderboard
-                    SET payment_status = 'direct'
-                    WHERE payment_status IS NULL OR payment_status = 'pending'
-                ''')
+                # # ---------- UPDATE LEADERBOARD PAYMENT STATUS ----------
+                # cursor.execute('''
+                #     UPDATE leaderboard
+                #     SET payment_status = 'direct'
+                #     WHERE payment_status IS NULL OR payment_status = 'pending'
+                # ''')
 
             conn.commit()
 
